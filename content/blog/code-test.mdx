@@ -1,0 +1,134 @@
+---
+title: '代码显示测试'
+date: '2024-01-19'
+description: '测试文章中的代码显示效果'
+---
+
+# 代码显示测试
+
+这篇文章用来测试不同编程语言的代码显示效果。
+
+## JavaScript 示例
+
+这是一个简单的 JavaScript 函数：
+
+```javascript
+function calculateSum(numbers) {
+  return numbers.reduce((sum, num) => {
+    // 添加到总和
+    return sum + num;
+  }, 0);
+}
+
+// 测试函数
+const numbers = [1, 2, 3, 4, 5];
+console.log(calculateSum(numbers)); // 输出: 15
+```
+
+## Python 示例
+
+这是一个 Python 类的示例：
+
+```python
+class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+    
+    def greet(self):
+        return f"Hello, my name is {self.name} and I'm {self.age} years old!"
+
+# 创建实例
+person = Person("Alice", 25)
+print(person.greet())
+```
+
+## TypeScript 示例
+
+这是一个 TypeScript 接口和类的示例：
+
+```typescript
+interface Vehicle {
+  brand: string;
+  year: number;
+  start(): void;
+}
+
+class Car implements Vehicle {
+  constructor(
+    public brand: string,
+    public year: number,
+    private engine: string
+  ) {}
+
+  start(): void {
+    console.log(`Starting ${this.brand} ${this.engine} engine...`);
+  }
+}
+
+const myCar = new Car("Tesla", 2024, "electric");
+myCar.start();
+```
+
+## CSS 示例
+
+这是一些 CSS 样式代码：
+
+```css
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+}
+
+.card {
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  transform: translateY(0);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+```
+
+## HTML 示例
+
+这是一个 HTML 结构示例：
+
+```html
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>示例页面</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#home">首页</a></li>
+                <li><a href="#about">关于</a></li>
+                <li><a href="#contact">联系</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>欢迎访问</h1>
+        <p>这是一个示例页面。</p>
+    </main>
+</body>
+</html>
+```
+
+## 行内代码测试
+
+在段落中使用行内代码时，比如 `const name = "John"` 或者 `import React from 'react'`，应该也有合适的样式。
+
+当我们使用 `npm install` 命令时，要注意查看输出信息。如果遇到 `Error: Module not found`，需要检查包名是否正确。

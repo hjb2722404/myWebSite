@@ -9,6 +9,8 @@ import { serialize } from 'next-mdx-remote/serialize'
 import { BlogPost } from '@/types/blog'
 import Comments from '@/components/blog/Comments'
 import ShareButtons from '@/components/blog/ShareButtons'
+import ArticleStats from '@/components/blog/ArticleStats'
+import CodeBlock from '@/components/blog/CodeBlock'
 
 const components = {
   h1: (props: any) => (
@@ -35,12 +37,19 @@ const components = {
   blockquote: (props: any) => (
     <blockquote className="border-l-4 border-gray-300 dark:border-gray-700 pl-4 italic my-4" {...props} />
   ),
-  code: (props: any) => (
-    <code className="bg-gray-100 dark:bg-gray-800 rounded px-1" {...props} />
-  ),
-  pre: (props: any) => (
-    <pre className="bg-gray-100 dark:bg-gray-800 rounded p-4 overflow-x-auto mb-4" {...props} />
-  ),
+  code: (props: any) => {
+    if (props.className) {
+      // 如果有className，说明是代码块
+      return <CodeBlock {...props} />
+    }
+    // 否则是行内代码
+    return <code className="bg-gray-100 dark:bg-gray-800 rounded px-1 font-mono text-sm" {...props} />
+  },
+  pre: (props: any) => {
+    // 移除默认的pre样式，让CodeBlock组件处理样式
+    const { children, ...rest } = props
+    return children
+  },
 }
 
 export default function BlogPost() {
@@ -49,6 +58,7 @@ export default function BlogPost() {
   const [post, setPost] = useState<BlogPost | null>(null)
   const [loading, setLoading] = useState(true)
   const [mdxSource, setMdxSource] = useState<any>(null)
+  const [views, setViews] = useState<number>(0)
 
   useEffect(() => {
     async function fetchPost() {
@@ -60,6 +70,20 @@ export default function BlogPost() {
           const mdxSource = await serialize(data.post.content)
           setMdxSource(mdxSource)
         }
+
+        // 获取文章浏览次数
+        const viewsResponse = await fetch(`/api/views?slug=${slug}`)
+        const viewsData = await viewsResponse.json()
+        setViews(viewsData.views)
+
+        // 增加浏览次数
+        await fetch('/api/views', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ slug }),
+        })
       } catch (error) {
         console.error('Failed to fetch post:', error)
       } finally {
@@ -107,6 +131,13 @@ export default function BlogPost() {
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               {post.title}
             </h1>
+            <div className="mb-8">
+              <ArticleStats
+                content={post.content}
+                publishDate={post.date}
+                views={views}
+              />
+            </div>
             <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-4">
               <span>{post.date}</span>
               <span className="mx-2">•</span>

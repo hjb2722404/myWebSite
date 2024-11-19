@@ -8,6 +8,7 @@ export interface BlogPost {
   category: string
   author: string
   readingTime: string
+  views?: number
 }
 
 export type BlogCategory = {
