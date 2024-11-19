@@ -23,10 +23,10 @@ export default function Comments({ slug }: CommentsProps) {
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">评论</h2>
       <Giscus
         id={slug}
-        repo="your-github-username/your-repo-name"
-        repoId="your-repo-id"
+        repo="hjb2722404/myWebsite"
+        repoId="R_kgDONRgtpA"
         category="Announcements"
-        categoryId="your-category-id"
+        categoryId="DIC_kwDONRgtpM4CkZa3"
         mapping="pathname"
         term="Welcome to @giscus/react component!"
         reactionsEnabled="1"
