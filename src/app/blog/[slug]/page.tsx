@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { MDXRemote } from 'next-mdx-remote'
 import { serialize } from 'next-mdx-remote/serialize'
-import { BlogPost } from '@/types/blog'
+import type { BlogPost as BlogPostType } from '@/types/blog'
 import Comments from '@/components/blog/Comments'
 import ShareButtons from '@/components/blog/ShareButtons'
 import ArticleStats from '@/components/blog/ArticleStats'
@@ -55,7 +55,7 @@ const components = {
 export default function BlogPost() {
   const params = useParams()
   const slug = params.slug as string
-  const [post, setPost] = useState<BlogPost | null>(null)
+  const [post, setPost] = useState<BlogPostType | null>(null)
   const [loading, setLoading] = useState(true)
   const [mdxSource, setMdxSource] = useState<any>(null)
   const [views, setViews] = useState<number>(0)
