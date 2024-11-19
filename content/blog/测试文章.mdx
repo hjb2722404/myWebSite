@@ -1,0 +1,62 @@
+---
+title: 使用Next.js和MDX构建个人博客
+date: '2024-01-20'
+excerpt: 详细介绍如何使用Next.js和MDX搭建一个现代化的个人博客系统
+author: He Jianbo
+tags: ['Next.js', 'MDX', 'React', 'TypeScript']
+category: 技术教程
+---
+
+# 使用Next.js和MDX构建个人博客
+
+在这篇文章中，我将详细介绍如何使用Next.js和MDX搭建一个现代化的个人博客系统。
+
+## 为什么选择Next.js和MDX？
+
+Next.js是一个强大的React框架，它提供了以下优势：
+
+- 服务器端渲染（SSR）
+- 静态站点生成（SSG）
+- 文件系统路由
+- API路由
+- 自动代码分割
+
+而MDX则让我们能够：
+
+- 在Markdown中使用React组件
+- 使用JSX增强内容展示
+- 保持文档的简洁性
+
+## 实现步骤
+
+1. 创建Next.js项目
+2. 配置MDX支持
+3. 实现博客文章列表
+4. 添加文章详情页
+5. 集成搜索功能
+6. 优化性能
+
+## 代码示例
+
+```typescript
+// pages/blog/[slug].tsx
+import { GetStaticProps, GetStaticPaths } from 'next'
+import { serialize } from 'next-mdx-remote/serialize'
+import { MDXRemote } from 'next-mdx-remote'
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const post = await getPostBySlug(params.slug)
+  const mdxSource = await serialize(post.content)
+  
+  return {
+    props: {
+      post,
+      mdxSource,
+    },
+  }
+}
+```
+
+## 总结
+
+通过使用Next.js和MDX，我们可以快速搭建一个功能完善的个人博客系统。这个组合不仅提供了良好的开发体验，还能确保最终产品的性能和可维护性。
