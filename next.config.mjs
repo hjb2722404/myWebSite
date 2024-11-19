@@ -15,7 +15,7 @@ const nextConfig = {
     ],
   },
   webpack: (config, { isServer }) => {
-    // MDX 配置
+    // MDX configuration
     config.module.rules.push({
       test: /\.mdx?$/,
       use: [
@@ -28,37 +28,48 @@ const nextConfig = {
       ],
     });
 
-    // 生产环境启用压缩
+    // Production optimizations
     if (!isServer && process.env.NODE_ENV === 'production') {
       config.optimization = {
         ...config.optimization,
+        minimize: true,
         splitChunks: {
           chunks: 'all',
-          minSize: 20000,
-          maxSize: 24000000, // 保持在 24MB 以下
+          minSize: 10000,
+          maxSize: 20000000, // Keep chunks under 20MB
           cacheGroups: {
             default: false,
             vendors: false,
-            // 将第三方库分开打包
+            // Separate third-party libraries
             vendor: {
               name: 'vendor',
               chunks: 'all',
-              test: /node_modules/,
+              test: /[\\/]node_modules[\\/]/,
               priority: 20,
+              enforce: true,
+              reuseExistingChunk: true,
             },
-            // 将公共组件分开打包
+            // Group common components
             common: {
               name: 'common',
               minChunks: 2,
-              chunks: 'all',
+              chunks: 'async',
               priority: 10,
               reuseExistingChunk: true,
               enforce: true,
             },
+            // Separate styles
+            styles: {
+              name: 'styles',
+              test: /\.(css|scss|sass)$/,
+              chunks: 'all',
+              enforce: true,
+            }
           },
         },
       };
     }
+
     return config;
   },
 }
