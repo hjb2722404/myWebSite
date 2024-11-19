@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useParams } from 'next/navigation'
@@ -52,76 +50,52 @@ const components = {
   },
 }
 
-export default function BlogPost() {
-  const params = useParams()
-  const slug = params.slug as string
-  const [post, setPost] = useState<BlogPostType | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [mdxSource, setMdxSource] = useState<any>(null)
-  const [views, setViews] = useState<number>(0)
+export async function generateStaticParams() {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blog`)
+  const data = await response.json()
+  return data.posts.map((post: BlogPostType) => ({
+    slug: post.slug,
+  }))
+}
 
-  useEffect(() => {
-    async function fetchPost() {
-      try {
-        const response = await fetch(`/api/blog?slug=${slug}`)
-        const data = await response.json()
-        setPost(data.post)
-        if (data.post?.content) {
-          const mdxSource = await serialize(data.post.content)
-          setMdxSource(mdxSource)
-        }
+export const revalidate = 3600 // 每小时重新验证一次
 
-        // 获取文章浏览次数
-        const viewsResponse = await fetch(`/api/views?slug=${slug}`)
-        const viewsData = await viewsResponse.json()
-        setViews(viewsData.views)
+async function getPost(slug: string) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blog?slug=${slug}`, {
+    next: { revalidate }
+  })
+  const data = await response.json()
+  return data.post
+}
 
-        // 增加浏览次数
-        await fetch('/api/views', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ slug }),
-        })
-      } catch (error) {
-        console.error('Failed to fetch post:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
+async function getViews(slug: string) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/views?slug=${slug}`, {
+    next: { revalidate }
+  })
+  const data = await response.json()
+  return data.views
+}
 
-    fetchPost()
-  }, [slug])
+export default async function BlogPost({ params }: { params: { slug: string } }) {
+  const post = await getPost(params.slug)
+  const views = await getViews(params.slug)
+  const mdxSource = await serialize(post.content)
 
-  if (loading) {
+  if (!post) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    )
-  }
-
-  if (!post || !mdxSource) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 pt-32">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            文章未找到
-          </h1>
-          <Link
-            href="/blog"
-            className="text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            返回博客列表
-          </Link>
-        </div>
+        <h1 className="text-2xl">Post not found</h1>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-white dark:bg-gray-900"
+    >
       <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -174,14 +148,14 @@ export default function BlogPost() {
               ← 返回博客列表
             </Link>
             <ShareButtons
-              url={`${process.env.NEXT_PUBLIC_SITE_URL}/blog/${slug}`}
+              url={`${process.env.NEXT_PUBLIC_SITE_URL}/blog/${params.slug}`}
               title={post.title}
             />
           </div>
         </motion.div>
 
-        <Comments slug={slug} />
+        <Comments slug={params.slug} />
       </article>
-    </div>
+    </motion.div>
   )
 }
