@@ -8,6 +8,7 @@ import { MDXRemote } from 'next-mdx-remote'
 import { serialize } from 'next-mdx-remote/serialize'
 import { BlogPost } from '@/types/blog'
 import Comments from '@/components/blog/Comments'
+import ShareButtons from '@/components/blog/ShareButtons'
 
 const components = {
   h1: (props: any) => (
@@ -134,12 +135,18 @@ export default function BlogPost() {
           transition={{ delay: 0.5 }}
           className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700"
         >
-          <Link
-            href="/blog"
-            className="text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            ← 返回博客列表
-          </Link>
+          <div className="flex justify-between items-center mb-8">
+            <Link
+              href="/blog"
+              className="text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              ← 返回博客列表
+            </Link>
+            <ShareButtons
+              url={`${process.env.NEXT_PUBLIC_SITE_URL}/blog/${slug}`}
+              title={post.title}
+            />
+          </div>
         </motion.div>
 
         <Comments slug={slug} />
