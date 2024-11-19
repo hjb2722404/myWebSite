@@ -9,6 +9,10 @@ interface BlogListProps {
 }
 
 export default function BlogList({ posts }: BlogListProps) {
+  if (!posts || !Array.isArray(posts)) {
+    return null;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -37,7 +41,7 @@ export default function BlogList({ posts }: BlogListProps) {
                 {post.excerpt}
               </p>
               <div className="flex flex-wrap gap-2">
-                {post.tags.map(tag => (
+                {post.tags && Array.isArray(post.tags) && post.tags.map(tag => (
                   <span
                     key={tag}
                     className="px-2 py-1 text-sm bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded"
