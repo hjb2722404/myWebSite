@@ -35,33 +35,67 @@ export async function GET(request: Request) {
       // Get single post
       const filePath = path.join(BLOG_DIR, `${slug}.mdx`)
       if (!fs.existsSync(filePath)) {
-        return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+        console.error(`Post file not found: ${filePath}`);
+        return NextResponse.json({ 
+          error: 'Post not found',
+          details: `File not found: ${slug}.mdx`
+        }, { status: 404 })
       }
 
-      const fileContent = fs.readFileSync(filePath, 'utf8')
-      const { data, content } = matter(fileContent)
+      try {
+        const fileContent = fs.readFileSync(filePath, 'utf8')
+        const { data, content } = matter(fileContent)
 
-      return NextResponse.json({
-        post: {
-          slug,
-          content,
-          ...data,
-        },
-      })
+        // 验证必要的字段
+        if (!data.title || !data.date) {
+          console.error(`Invalid post metadata for ${slug}:`, data);
+          return NextResponse.json({
+            error: 'Invalid post metadata',
+            details: 'Missing required fields'
+          }, { status: 500 })
+        }
+
+        return NextResponse.json({
+          post: {
+            slug,
+            content,
+            ...data,
+          },
+        })
+      } catch (error) {
+        console.error(`Error reading/parsing post file ${filePath}:`, error);
+        return NextResponse.json({
+          error: 'Error processing post file',
+          details: error instanceof Error ? error.message : String(error)
+        }, { status: 500 })
+      }
     } else {
       // Get all posts
       const files = fs.readdirSync(BLOG_DIR)
       const posts = files
         .filter(file => file.endsWith('.mdx'))
         .map(file => {
-          const filePath = path.join(BLOG_DIR, file)
-          const fileContent = fs.readFileSync(filePath, 'utf8')
-          const { data } = matter(fileContent)
-          return {
-            slug: file.replace('.mdx', ''),
-            ...data,
+          try {
+            const filePath = path.join(BLOG_DIR, file)
+            const fileContent = fs.readFileSync(filePath, 'utf8')
+            const { data } = matter(fileContent)
+            
+            // 验证必要的字段
+            if (!data.title || !data.date) {
+              console.error(`Invalid post metadata for ${file}:`, data);
+              return null
+            }
+
+            return {
+              slug: file.replace('.mdx', ''),
+              ...data,
+            }
+          } catch (error) {
+            console.error(`Error processing file ${file}:`, error);
+            return null
           }
         })
+        .filter(post => post !== null) // 移除无效的文章
         .sort((a: any, b: any) => {
           return new Date(b.date).getTime() - new Date(a.date).getTime()
         })
@@ -71,7 +105,7 @@ export async function GET(request: Request) {
 
       // Get all categories
       const categories = Array.from(
-        new Set(posts.map((post: any) => post.category))
+        new Set(posts.map((post: any) => post.category).filter(Boolean))
       ).map(category => ({
         name: category,
         count: posts.filter((post: any) => post.category === category).length,
