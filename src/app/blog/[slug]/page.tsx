@@ -9,7 +9,6 @@ import Comments from '@/components/blog/Comments'
 import ShareButtons from '@/components/blog/ShareButtons'
 import ArticleStats from '@/components/blog/ArticleStats'
 import CodeBlock from '@/components/blog/CodeBlock'
-import BlogPostClient from '@/components/blog/BlogPostClient'
 
 const components = {
   h1: (props: any) => (
@@ -80,24 +79,83 @@ async function getViews(slug: string) {
 export default async function BlogPost({ params }: { params: { slug: string } }) {
   const post = await getPost(params.slug)
   const views = await getViews(params.slug)
-  
+  const mdxSource = await serialize(post.content)
+
   if (!post) {
-    return <div>Post not found</div>
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+        <h1 className="text-2xl">Post not found</h1>
+      </div>
+    )
   }
 
-  const source = await serialize(post.content || '', {
-    mdxOptions: {
-      remarkPlugins: [],
-      rehypePlugins: [],
-    },
-  })
-
   return (
-    <BlogPostClient post={post} views={views}>
-      <MDXRemote
-        {...source}
-        components={components}
-      />
-    </BlogPostClient>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-white dark:bg-gray-900"
+    >
+      <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <header className="mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              {post.title}
+            </h1>
+            <div className="mb-8">
+              <ArticleStats
+                content={post.content}
+                publishDate={post.date}
+                views={views}
+              />
+            </div>
+            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+              <span>{post.date}</span>
+              <span className="mx-2">•</span>
+              <span>{post.author}</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {post?.tags?.map(tag => (
+                <span
+                  key={tag}
+                  className="px-2 py-1 text-sm bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </header>
+
+          <div className="prose prose-lg dark:prose-invert max-w-none">
+            <MDXRemote {...mdxSource} components={components} />
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700"
+        >
+          <div className="flex justify-between items-center mb-8">
+            <Link
+              href="/blog"
+              className="text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              ← 返回博客列表
+            </Link>
+            <ShareButtons
+              url={`/blog/${params.slug}`}
+              title={post.title}
+            />
+          </div>
+        </motion.div>
+
+        <Comments slug={params.slug} />
+      </article>
+    </motion.div>
   )
 }
