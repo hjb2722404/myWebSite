@@ -51,7 +51,7 @@ const components = {
 }
 
 export async function generateStaticParams() {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blog`)
+  const response = await fetch(`/api/blog`)
   const data = await response.json()
   return data.posts.map((post: BlogPostType) => ({
     slug: post.slug,
@@ -61,7 +61,7 @@ export async function generateStaticParams() {
 export const revalidate = 3600 // 每小时重新验证一次
 
 async function getPost(slug: string) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blog?slug=${slug}`, {
+  const response = await fetch(`/api/blog?slug=${slug}`, {
     next: { revalidate }
   })
   const data = await response.json()
@@ -69,7 +69,7 @@ async function getPost(slug: string) {
 }
 
 async function getViews(slug: string) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/views?slug=${slug}`, {
+  const response = await fetch(`/api/views?slug=${slug}`, {
     next: { revalidate }
   })
   const data = await response.json()
@@ -118,7 +118,7 @@ export default async function BlogPost({ params }: { params: { slug: string } })
               <span>{post.author}</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {post?.tags?.map((tag: string) => (
+              {post?.tags?.map(tag => (
                 <span
                   key={tag}
                   className="px-2 py-1 text-sm bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded"
@@ -148,7 +148,7 @@ export default async function BlogPost({ params }: { params: { slug: string } })
               ← 返回博客列表
             </Link>
             <ShareButtons
-              url={`${process.env.NEXT_PUBLIC_SITE_URL}/blog/${params.slug}`}
+              url={`/blog/${params.slug}`}
               title={post.title}
             />
           </div>
