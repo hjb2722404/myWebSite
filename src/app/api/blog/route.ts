@@ -21,6 +21,16 @@ export async function GET(request: Request) {
   const searchQuery = searchParams.get('search')
 
   try {
+    // 检查博客目录是否存在
+    if (!fs.existsSync(BLOG_DIR)) {
+      console.error(`Blog directory not found: ${BLOG_DIR}`);
+      return NextResponse.json({ 
+        posts: [],
+        categories: [],
+        error: 'Blog directory not found' 
+      });
+    }
+
     if (slug) {
       // Get single post
       const filePath = path.join(BLOG_DIR, `${slug}.mdx`)
@@ -75,7 +85,12 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error processing blog request:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        posts: [],
+        categories: [],
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     )
   }
