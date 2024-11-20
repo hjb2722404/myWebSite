@@ -51,7 +51,8 @@ const components = {
 }
 
 export async function generateStaticParams() {
-  const response = await fetch(`/api/blog`)
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const response = await fetch(`${baseUrl}/api/blog`)
   const data = await response.json()
   return data.posts.map((post: BlogPostType) => ({
     slug: post.slug,
@@ -61,7 +62,8 @@ export async function generateStaticParams() {
 export const revalidate = 3600 // 每小时重新验证一次
 
 async function getPost(slug: string) {
-  const response = await fetch(`/api/blog?slug=${slug}`, {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const response = await fetch(`${baseUrl}/api/blog?slug=${slug}`, {
     next: { revalidate }
   })
   const data = await response.json()
@@ -69,7 +71,8 @@ async function getPost(slug: string) {
 }
 
 async function getViews(slug: string) {
-  const response = await fetch(`/api/views?slug=${slug}`, {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const response = await fetch(`${baseUrl}/api/views?slug=${slug}`, {
     next: { revalidate }
   })
   const data = await response.json()
