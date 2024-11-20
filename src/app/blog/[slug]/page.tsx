@@ -51,17 +51,33 @@ const components = {
 }
 
 export async function generateStaticParams() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-  const response = await fetch(`${baseUrl}/api/blog`, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    cache: 'no-cache'
-  });
-  const data = await response.json()
-  return data.posts.map((post: BlogPostType) => ({
-    slug: post.slug,
-  }))
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/blog`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-cache'
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to fetch blog posts:', await response.text());
+      return [];
+    }
+    
+    const data = await response.json();
+    if (!data.posts) {
+      console.error('Invalid response format:', data);
+      return [];
+    }
+    
+    return data.posts.map((post: BlogPostType) => ({
+      slug: post.slug,
+    }));
+  } catch (error) {
+    console.error('Error in generateStaticParams:', error);
+    return [];
+  }
 }
 
 export const revalidate = 3600 // 每小时重新验证一次
