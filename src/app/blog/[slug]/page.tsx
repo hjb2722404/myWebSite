@@ -1,14 +1,14 @@
-'use client'
-
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import { MDXRemote } from 'next-mdx-remote'
 import { serialize } from 'next-mdx-remote/serialize'
 import type { BlogPost as BlogPostType } from '@/types/blog'
 import Comments from '@/components/blog/Comments'
 import ShareButtons from '@/components/blog/ShareButtons'
 import ArticleStats from '@/components/blog/ArticleStats'
-import MDXContent from '@/components/blog/MDXContent'
+import CodeBlock from '@/components/blog/CodeBlock'
 import BlogPostClient from '@/components/blog/BlogPostClient'
 
 const components = {
@@ -80,51 +80,24 @@ async function getViews(slug: string) {
 export default async function BlogPost({ params }: { params: { slug: string } }) {
   const post = await getPost(params.slug)
   const views = await getViews(params.slug)
-  const source = await serialize(post.content, {
+  
+  if (!post) {
+    return <div>Post not found</div>
+  }
+
+  const source = await serialize(post.content || '', {
     mdxOptions: {
       remarkPlugins: [],
       rehypePlugins: [],
     },
   })
 
-  if (!post) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
-        <h1 className="text-2xl">Post not found</h1>
-      </div>
-    )
-  }
-
   return (
     <BlogPostClient post={post} views={views}>
-      <article className="prose dark:prose-invert max-w-none">
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-          <div className="flex items-center gap-4 mb-4">
-            <ArticleStats
-              publishDate={post.date}
-              views={views}
-            />
-          </div>
-          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-4">
-            <span>{post.date}</span>
-            <span className="mx-2">•</span>
-            <span>{post.author}</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {post?.tags?.map(tag: string => (
-              <span
-                key={tag}
-                className="px-2 py-1 text-sm bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        </header>
-        <MDXContent source={source} />
-        <Comments slug={params.slug} />
-      </article>
+      <MDXRemote
+        {...source}
+        components={components}
+      />
     </BlogPostClient>
   )
 }
